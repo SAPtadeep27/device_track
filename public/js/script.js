@@ -21,7 +21,7 @@ if (navigator.geolocation) {
         },
         {
             enableHighAccuracy: true,
-            timeout: 5000,
+            timeout: 50000,
             maximumAge: 0,
         }
     );
