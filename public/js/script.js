@@ -45,10 +45,10 @@ const redIcon = L.icon({
 });
 
 const landmarks = [
-    { name: "Helping Hands Ngo", imageUrl: " ", latitude: 22.542556, longitude: 88.3825428 },   
-    { name: "Society For Indian Children's Welfare", latitude: 22.5373426, longitude: 88.3637687 },  
-    { name: "The Hope Foundation Ltd", latitude: 22.5052385, longitude: 88.3569133 }, 
-    { name: "Hope Kolkata Foundation", latitude: 22.5209543, longitude: 88.3582089 }, 
+    { name: "Calcutta Orphange", imageUrl: "./images/Calcutta Orphange4.jpg",location:"12/1, Balaram Ghosh Street, Shyambazar, Kolkata - 700004 (Near Shyampukur Police Station)",contact:"phone.no :  03325555192",children: "120 children",cost:"  120-130/-per plate" , latitude: 22.59884086070276, longitude: 88.37078588465711 },   
+    { name: "sahyog a child(help a child)", imageUrl: "./images/sahyog a child(help a child).jpg ",location:"rishnapur, Kestopur, Kolkata, West Bengal 700102, Krishnapur, Kolkata - 700102 (Chandiberia, Near Ankur Club)",contact:"phone.no : 7947106203",children: "34 children",cost:"  65/-per plate" , latitude: 22.59310629484466, longitude:  88.43878670489134 },  
+    { name: "Save the Orphan", imageUrl: "./images/Save the Orphan2.jpg ",location:"Rania Nabarun Pur, Bansdroni Near Metro Station Master The Surjo Sen, Post Office ; Boral Pin Code; 700154, Tollygunge, Kolkata - 700033 (Near Rania Power House)",contact:"phone.no : 9830096152", children: "70 children, 15 old, 12 staff",cost:" 175-200/-per plate" ,latitude: 22.455350464839466, longitude:  88.34948290108458}, 
+    { name: "Universal smile",imageUrl: "./images/Universal smile.jpg ",location:" 143/74, Picnic Garden Road, Tiljala, Kolkata - 700039",contact:"phone.no:7947106203", children: "38 children",cost:" 110-125/-per plate" ,latitude: 22.528781897130525, longitude: 88.38600906231345}, 
 ];
 
 
@@ -56,12 +56,16 @@ landmarks.forEach((landmark) => {
         const popupContent = `
             <div>
                 <h3>${landmark.name}</h3>
-                <img src="${landmark.imageUrl}" alt="${landmark.name}" style="width: 200px; height: auto;" />
+                <h3>${landmark.location}</h3>
+                <h3>${landmark.contact}</h3>
+                <h3>${landmark.cost}</h3>
+                <h3>${landmark.children}</h3>
+                <img src="${landmark.imageUrl}" alt="${landmark.name}" style="width: 100px; height: auto;" />
             </div>
         `;
     const marker = L.marker([landmark.latitude, landmark.longitude], { icon: redIcon })
         .addTo(map)
-        .bindPopup(landmark.name)
+        .bindPopup(popupContent)
         .on("click", () => {
             if (userMarker) {
                 
