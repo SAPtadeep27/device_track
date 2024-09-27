@@ -18,7 +18,7 @@ const io = socketio(server, {
 // Set up CORS for HTTP routes
 app.use(cors({
   origin: 'https://device-track.onrender.com',  // Replace with your frontend domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  //methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type'],
   credentials: true
 }));

@@ -52,41 +52,87 @@ const landmarks = [
 ];
 
 
+const openRouteServiceApiKey = '5b3ce3597851110001cf624830174d651e40431086ea4ce874e8d351'; // Replace with your API key
+
+
+let distanceElement = document.getElementById('distance');
+let durationElement = document.getElementById('duration');
+
+function updateRouteAndInfo(userLat, userLng, destinationLat, destinationLng) {
+    const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteServiceApiKey}&start=${userLng},${userLat}&end=${destinationLng},${destinationLat}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const route = data.features[0].geometry.coordinates;
+            const latLngs = route.map(coord => [coord[1], coord[0]]);
+            
+            // Update the route polyline on the map
+            if (currentRoute) {
+                map.removeLayer(currentRoute);
+            }
+            currentRoute = L.polyline(latLngs, { color: 'blue' }).addTo(map);
+
+            // Update the distance and time info
+            const distance = (data.features[0].properties.segments[0].distance / 1000).toFixed(2); // in km
+            const duration = (data.features[0].properties.segments[0].duration / 60).toFixed(2);  // in minutes
+            distanceElement.textContent = `${distance} km`;
+            durationElement.textContent= `${duration} min`;
+
+            // Fit the map to the route
+            map.fitBounds(currentRoute.getBounds());
+        })
+        .catch(error => {
+            console.error('Error fetching route:', error);
+        });
+}
+
+// When the user moves, update the route and info in real-time
+navigator.geolocation.watchPosition(
+    (position) => {
+        const { latitude, longitude } = position.coords;
+        socket.emit("send-location", { latitude, longitude });
+
+        if (userMarker) {
+            userMarker.setLatLng([latitude, longitude]);
+
+            // Assuming destination is selected when user clicks on the landmark
+            if (currentLandmark) {
+                updateRouteAndInfo(latitude, longitude, currentLandmark.latitude, currentLandmark.longitude);
+            }
+        }
+    },
+    (error) => {
+        console.error(error);
+    },
+    {
+        enableHighAccuracy: true,
+        timeout: 50000,
+        maximumAge: 0,
+    }
+);
+
+let currentLandmark = null;
+
 landmarks.forEach((landmark) => {
-        const popupContent = `
-            <div>
-                <h3>${landmark.name}</h3>
-                <h3>${landmark.location}</h3>
-                <h3>${landmark.contact}</h3>
-                <h3>${landmark.cost}</h3>
-                <h3>${landmark.children}</h3>
-                <img src="${landmark.imageUrl}" alt="${landmark.name}" style="width: 100px; height: auto;" />
-            </div>
-        `;
+    const popupContent = `
+        <div>
+            <h3>${landmark.name}</h3>
+            <h3>${landmark.location}</h3>
+            <h3>${landmark.contact}</h3>
+            <h3>${landmark.cost}</h3>
+            <h3>${landmark.children}</h3>
+            <img src="${landmark.imageUrl}" alt="${landmark.name}" style="width: 100px; height: auto;" />
+        </div>
+    `;
     const marker = L.marker([landmark.latitude, landmark.longitude], { icon: redIcon })
         .addTo(map)
         .bindPopup(popupContent)
         .on("click", () => {
+            currentLandmark = landmark; // Set the clicked landmark as the destination
+
             if (userMarker) {
-                
-                if (currentRoute) {
-                    map.removeControl(currentRoute);
-                }
-                
-                currentRoute = L.Routing.control({
-                    waypoints: [
-                        L.latLng(userMarker.getLatLng()), 
-                        L.latLng(landmark.latitude, landmark.longitude) 
-                    ],
-                    routeWhileDragging: true,
-                    createMarker: function() { return null; }
-                }).addTo(map);
-                
-                
-                //map.fitBounds([
-                    //userMarker.getLatLng(),
-                    //[ landmark.latitude, landmark.longitude]
-               // ]);
+                updateRouteAndInfo(userMarker.getLatLng().lat, userMarker.getLatLng().lng, landmark.latitude, landmark.longitude);
             }
         });
 });
